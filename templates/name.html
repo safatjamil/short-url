@@ -1,0 +1,34 @@
+{% extends "master.html" %}
+{% block head %}
+{% load static %}
+  <head>
+  <title>Signup</title>
+  <link rel="stylesheet" href="{% static 'signup.css' %}">
+  <!--<script src="{% static 'signup.js'%}"></script>-->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+{% endblock %}
+
+
+{% block content %}
+  <form action="" method="post">
+    {% csrf_token %}
+      <div class="container">
+        <h1>Register</h1>
+        {% if form.errors%}
+        <div class="response">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        {% for field in form %}
+          {{field}}
+      {% endfor %}
+      <button type="submit" class="registerbtn" onclick="validate()">Register</button>
+      </div>
+
+      <div class="container signin">
+        <p>Already have an account? <a href="/signin/">Sign in</a>.</p>
+      </div>
+  </form>
+{% endblock %}
