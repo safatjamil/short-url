@@ -15,7 +15,11 @@
  <p class="email">Email : {{account.org_email}}</p>   
  <p class="alias">Alias : {{account.org_alias}}</p> 
  <p class="email"> <a href="/create_rl/" style="text-decoration:none;">Create redirection rule</a> </p>
+ <div class="signout_button">
+    <a href= "/signout/" class='signout'>Sign out</a>
 </div>
+</div>
+
 
 <div class="rules_container">
     <p class="alias">Redirection rules</p>
@@ -25,7 +29,7 @@
         <div class='rule_name'><p>{{rule.redirect_name}}</p></div>
         <div class='incoming_url'><p>{{host}}/{{rule.incoming_url}}</p></div>
         <div class='outgoing_url'><p>{{rule.redirect_to}}</p></div>
-        <div class="delete_button">
+        <div class="button">
            <span><a href= "/edit_rl/{{rule.id}}" class='edit' target="_blank">edit</a></span>
            <span style="margin-left:10px;"><a href= "/delete_rl/{{rule.id}}" class='delete' target="_blank">Delete</a></span>
         </div>

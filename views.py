@@ -162,5 +162,8 @@ def main_redirection(request,short_code):
         return HttpResponse('<html><head><title>Error</title></head><body><p>Something went wrong. We can not find any redirection rule for this url.<p></body></html>')
     return HttpResponseRedirect(get_rule[0]["redirect_to"])
 
- 
-    
+def signout(request):
+    del request.session["signed_in"]
+    del request.session["fk"]
+    del request.session["sk"]
+    return redirect('/signin/')
