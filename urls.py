@@ -21,6 +21,7 @@ urlpatterns = [
     path('',views.start,name='start'),
     path('signup/',views.signup,name='signup'),
     path('signin/',views.signin,name='signin'),
-    path('name/',views.name,name='name'),
+    path('home/',views.home,name='home'),
+    path('create_rl/',views.create_redirection_map,name='create_redirection_map'),
     
 ]

@@ -1,0 +1,33 @@
+{% extends "master.html" %}
+{% block head %}
+{% load static %}
+  <head>
+  <title>Home</title>
+  <link rel="stylesheet" href="{% static 'home.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+{% endblock %}
+
+
+{% block content %}
+<div class="account_details">
+ <p class="email">Account details</p> 
+ <p class="email">Email : {{account.org_email}}</p>   
+ <p class="alias">Alias : {{account.org_alias}}</p> 
+ <p class="email"> <a href="/create_rl/" style="text-decoration:none;">Create redirection rule</a> </p>
+</div>
+
+<div class="rules_container">
+    <p class="alias">Redirection rules</p>
+    {% if redirection_rules %}
+      {% for rediction in redirection_rules%}
+      <p>rediction.redirect_name</p>
+      {% endfor %}
+    <p>There are redirection rules</p>
+    {% else %}
+    <p class="gen_text">No rules found</p>
+    {% endif %} 
+</div>
+
+{% endblock %}
+

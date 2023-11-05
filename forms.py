@@ -22,6 +22,7 @@ class SignUpForm(forms.Form):
             raise forms.ValidationError('Enter a password of at least 6 characters')
         if password!=re_password:
             raise forms.ValidationError("Passwords don't match")
+
 class SignInForm(forms.Form):
     org_email = forms.CharField(widget=forms.TextInput(attrs={"name":"org_email","placeholder":"Email"}),required=True)
     password = forms.CharField(widget=forms.TextInput(attrs={"name":"password","placeholder":"Password - at least 6 chars","type":"password"}),required=True)
@@ -33,3 +34,14 @@ class SignInForm(forms.Form):
             raise forms.ValidationError('Please enter a valid email address')
         if len(password)<6:
             raise forms.ValidationError('You\'re trying a short password')
+
+
+class RedirectMapForm(forms.Form):
+    rule_name = forms.CharField(widget=forms.TextInput(attrs={"name":"rule_name","placeholder":"Name of the rule"}),required=True)
+    redirect_to_url = forms.CharField(widget=forms.Textarea(attrs={"name":"redirect_to_url","placeholder":"redirect_to","rows":6,"cols":50}),required=True)
+    def clean(self):
+        cleaned_data = super().clean()
+        rule_name = cleaned_data.get('rule_name')
+        redirect_to_url = cleaned_data.get('redirect_to_url')
+        
+

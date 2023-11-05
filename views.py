@@ -5,16 +5,19 @@ from django.urls import reverse
 from django.contrib import messages
 import datetime,re,bcrypt
 from .forms import SignUpForm,SignInForm
-from . import models
+from . import models,common_resources
+from cryptography.fernet import Fernet
+
 def start(request):
     user_id = request.COOKIES.get('short_url_i')
     redirect_to = current_datetime
     if not user_id:
-        return redirect('signup/')
-    return redirect('signin/')
+        return redirect('/signup/')
+    return redirect('/signin/')
 
 def signup(request):
-    html = "signup.html"
+    if "signed_in" in request.session and request.session["signed_in"]==True:
+        return redirect('/home/')
     if request.method == "POST":
         form = SignUpForm(request.POST)
         if form.is_valid():
@@ -22,8 +25,7 @@ def signup(request):
             org_alias = form.cleaned_data["org_alias"]
             org_alias = org_alias.upper()
             password = form.cleaned_data["password"]
-            password = password.encode('utf-8')
-            hashed_password = bcrypt.hashpw(password,bcrypt.gensalt())
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
 
             view_response,error_flag = "", False
             org_email_query = models.Org.objects.filter(org_email=org_email).count()
@@ -36,40 +38,59 @@ def signup(request):
                 view_response += "This alias is not available"
                 error_flag = True
             if error_flag:
-                #messages.error(request,view_response)
-                #return redirect('/signup/')
-                return render(request, html, {"form": form,"messages":[view_response]})
+                return render(request, common_resources.signup_html, {"form": form,"messages":[view_response]})
             else:
                 object_ = models.Org(org_email=org_email,org_alias=org_alias,password=hashed_password)
                 object_.save()
-                #messages.error(request,"Your account has been created. Please visit the sign in page")
-                return render(request, html, {"form": form,"messages":["Your account has been created. Please visit the sign in page"]}) 
+                return render(request, common_resources.signup_html, {"form": form,"messages":["Your account has been created. Please visit the sign in page"]}) 
     else:
         form = SignUpForm()
-    return render(request, html, {"form": form,"messages":[]})
+    return render(request, common_resources.signup_html, {"form": form,"messages":[]})
 
 def signin(request):
-    html = "signin.html"
+    if "signed_in" in request.session and request.session["signed_in"]==True:
+        return redirect('/home/')
     if request.method == "POST":
         form = SignInForm(request.POST)
         if form.is_valid():
             org_email = form.cleaned_data["org_email"]
             password = form.cleaned_data["password"]
-            password = password.encode('utf-8')
-            hashed_password = bcrypt.hashpw(password,bcrypt.gensalt())
-            user_query = models.Org.objects.filter(org_email=org_email,password=hashed_password).count()
-            if user_query<1:
-                return render(request, html, {"form": form,"messages":["Email or password is not correct"]}) 
+            user_count = models.Org.objects.filter(org_email=org_email).count()
+            if user_count<1:
+                return render(request, common_resources.signin_html, {"form": form,"messages":["We can't find this account"]}) 
             else:
-                return render(request, html, {"form": form,"messages":["Your account is valid"]}) 
+                user_query = models.Org.objects.filter(org_email=org_email).values()
+                password_match = bcrypt.checkpw(password.encode('utf-8'), user_query[0]['password']) 
+                if password_match:
+                    key = Fernet.generate_key()
+                    fernet = Fernet(key)
+                    encrypted_id = fernet.encrypt(str(user_query[0]['id']).encode())
+                    request.session["signed_in"] = True
+                    request.session["fk"] = key.decode()
+                    request.session["sk"] = encrypted_id.decode()
+                    request.session.set_expiry(120)
+                    return redirect('/home/')
+                else:
+                    return render(request, common_resources.signin_html, {"form": form,"messages":["Your email or password is incorrect"]}) 
     else:
         form = SignInForm()
-    return render(request, html, {"form": form,"messages":[]}) 
+    return render(request, common_resources.signin_html, {"form": form,"messages":[]}) 
+def home(request):
+    if "signed_in" not in request.session or request.session["signed_in"]==False:
+        return redirect('/signin/')
+    
+    decr_id = common_resources.get_org_id(request)
+    account = models.Org.objects.filter(id=decr_id).values()
+    redirection_rules = models.RedirectMap.objects.filter(id=decr_id).values()
+    return render(request, common_resources.home_html, {"account":account[0],"redirection_rules":redirection_rules}) 
+    
 
-def current_datetime(request,time):
-    now = datetime.datetime.now()
-    html = "<html><body>It is now %s.</body></html>" % now
-    return HttpResponse(html)
+def create_redirection_map(request):
+    if "signed_in" not in request.session or request.session["signed_in"]==False:
+        return redirect('/signin/')
+    decr_id = common_resources.get_org_id(request)
+    account = models.Org.objects.filter(id=decr_id).values()
+    return render(request, common_resources.create_redirection_map_html, {"account":account[0]}) 
 
 def global_login(request):
     html = "<html><body>Global Login</body></html>"
