@@ -1,6 +1,8 @@
 from cryptography.fernet import Fernet
+from django.shortcuts import redirect
 from . import models
 import random
+
 
 # attributes
 email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
@@ -13,12 +15,12 @@ signin_html = 'signin.html'
 home_html = 'home.html'
 create_redirection_map_html = 'create_redirection_map.html'
 delete_redirection_map_html = 'delete_redirection_map.html'
-
+edit_redirection_map_html = 'edit_redirection_map.html'
 # methods
 def get_org_id(request):
     fer = Fernet(bytes(request.session["fk"],'utf-8'))
     decr_id = int(fer.decrypt(bytes(request.session["sk"],'utf-8')).decode())
-    return decr_id
+    return str(decr_id)
 
 def get_user(id):
     user = models.Org.objects.filter(id=id).values()
@@ -35,3 +37,8 @@ def get_redirection_rule(rule_id):
 def gen_rand_str(size):
     randcode = ''.join(random.choices(randcode_string, k=size))
     return str(randcode)
+
+def is_logged_in(request):
+    if "signed_in" in request.session and request.session["signed_in"]==True:
+        return True
+    return False

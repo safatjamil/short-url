@@ -14,7 +14,7 @@ def start(request):
     return redirect('/signup/')
 
 def signup(request):
-    if "signed_in" in request.session and request.session["signed_in"]==True:
+    if common_resources.is_logged_in(request):
         return redirect('/home/')
     if request.method == "POST":
         form = SignUpForm(request.POST)
@@ -46,7 +46,7 @@ def signup(request):
     return render(request, common_resources.signup_html, {"form": form,"messages":[]})
 
 def signin(request):
-    if "signed_in" in request.session and request.session["signed_in"]==True:
+    if common_resources.is_logged_in(request):
         return redirect('/home/')
     if request.method == "POST":
         form = SignInForm(request.POST)
@@ -74,7 +74,7 @@ def signin(request):
         form = SignInForm()
     return render(request, common_resources.signin_html, {"form": form,"messages":[]}) 
 def home(request):
-    if "signed_in" not in request.session or request.session["signed_in"]==False:
+    if not common_resources.is_logged_in(request):
         return redirect('/signin/')
     decr_id = common_resources.get_org_id(request)
     account = common_resources.get_user(decr_id)
@@ -84,7 +84,7 @@ def home(request):
     
 
 def create_redirection_map(request):
-    if "signed_in" not in request.session or request.session["signed_in"]==False:
+    if not common_resources.is_logged_in(request):
         return redirect('/signin/')
     decr_id = common_resources.get_org_id(request)
     account = common_resources.get_user(decr_id)
@@ -110,6 +110,18 @@ def create_redirection_map(request):
         form = RedirectMapForm()
     return render(request, common_resources.create_redirection_map_html, {"account":account,"form":form}) 
 
+
+def edit_redirection_map(request,rl_id):
+    if not common_resources.is_logged_in(request):
+        return redirect('/signin/')
+
+    get_rule = common_resources.get_redirection_rule(rl_id)
+    if (not get_rule) or get_rule[0]["org_id"] != common_resources.get_org_id(request):
+        return HttpResponse('<html><head><title>Error</title></head><body><p>Something went wrong arnir putkite ki je gondho<p></body></html>')
+    
+    return render(request, common_resources.edit_redirection_map_html) 
+
+
 def delete_redirection_map(request,rl_id):
     if "signed_in" not in request.session or request.session["signed_in"]==False:
         return redirect('/signin/')
@@ -118,7 +130,7 @@ def delete_redirection_map(request,rl_id):
     if not get_rule:
         message = "This rule does not exist"
     else:
-        if int(get_rule[0]["org_id"]) != common_resources.get_org_id(request):
+        if get_rule[0]["org_id"] != common_resources.get_org_id(request):
             message = "You're trying to delete a wrong rule"
         else:
             rule = models.RedirectMap.objects.get(id=rl_id)

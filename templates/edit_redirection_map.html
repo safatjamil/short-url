@@ -1,0 +1,36 @@
+{% extends "master.html" %}
+{% block head %}
+{% load static %}
+  <head>
+  <title>Create redirection rule</title>
+  <link rel="stylesheet" href="{% static 'create_rl.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+{% endblock %}
+
+
+{% block content %}
+<div class="container">
+ <div class="gen_margin"><p class="header">Create rediction rule</p></div>
+ <form action="" method="post">
+      {% csrf_token %}
+      <div class="container">
+
+        {% if form.errors%}
+        <div class="response">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        {% for field in form %}
+        <div class="gen_margin">
+          {{field}}
+        </div>
+        {% endfor %}
+        <div class="gen_margin"><button type="submit" class="registerbtn">Create</button></div>
+      </div>
+</form>
+</div>
+
+{% endblock %}
+
