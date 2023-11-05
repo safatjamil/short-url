@@ -4,16 +4,14 @@ from django.template import loader
 from django.urls import reverse
 from django.contrib import messages
 import datetime,re,bcrypt
-from .forms import SignUpForm,SignInForm
+from .forms import SignUpForm,SignInForm,RedirectMapForm
 from . import models,common_resources
 from cryptography.fernet import Fernet
 
 def start(request):
-    user_id = request.COOKIES.get('short_url_i')
-    redirect_to = current_datetime
-    if not user_id:
-        return redirect('/signup/')
-    return redirect('/signin/')
+    if "signed_in" in request.session and request.session["signed_in"]==True:
+        return redirect('/home/')
+    return redirect('/signup/')
 
 def signup(request):
     if "signed_in" in request.session and request.session["signed_in"]==True:
@@ -68,7 +66,7 @@ def signin(request):
                     request.session["signed_in"] = True
                     request.session["fk"] = key.decode()
                     request.session["sk"] = encrypted_id.decode()
-                    request.session.set_expiry(120)
+                    request.session.set_expiry(300)
                     return redirect('/home/')
                 else:
                     return render(request, common_resources.signin_html, {"form": form,"messages":["Your email or password is incorrect"]}) 
@@ -78,34 +76,35 @@ def signin(request):
 def home(request):
     if "signed_in" not in request.session or request.session["signed_in"]==False:
         return redirect('/signin/')
-    
     decr_id = common_resources.get_org_id(request)
-    account = models.Org.objects.filter(id=decr_id).values()
-    redirection_rules = models.RedirectMap.objects.filter(id=decr_id).values()
-    return render(request, common_resources.home_html, {"account":account[0],"redirection_rules":redirection_rules}) 
+    account = common_resources.get_user(decr_id)
+    redirection_rules = common_resources.get_redirection_rules(decr_id)
+    host = common_resources.host
+    return render(request, common_resources.home_html, {"account":account,"redirection_rules":redirection_rules,'host':host}) 
     
 
 def create_redirection_map(request):
     if "signed_in" not in request.session or request.session["signed_in"]==False:
         return redirect('/signin/')
     decr_id = common_resources.get_org_id(request)
-    account = models.Org.objects.filter(id=decr_id).values()
-    return render(request, common_resources.create_redirection_map_html, {"account":account[0]}) 
-
-def global_login(request):
-    html = "<html><body>Global Login</body></html>"
-    return HttpResponse(html)
-
-
-def name(request):
+    account = common_resources.get_user(decr_id)
     if request.method == "POST":
-        form = SignUPForm(request.POST)
+        form = RedirectMapForm(request.POST)
         if form.is_valid():
-            
-            return HttpResponseRedirect("/signin")
-
-    # if a GET (or any other method) we'll create a blank form
+            rule_name = form.cleaned_data["rule_name"]
+            redirect_to_url = form.cleaned_data["redirect_to_url"]
+            org_alias = account['org_alias']
+            randcode = common_resources.gen_rand_str(5)
+            counter = 0
+            while counter<10:
+                if models.RedirectMap.objects.filter(org_alias=org_alias,randcode=randcode).count()>0:
+                    randcode = common_resources.gen_rand_str(5)
+                else:
+                    break
+                counter+=1
+            object_ = models.RedirectMap(org_id=decr_id,org_alias=org_alias,redirect_name=rule_name,randcode=randcode,redirect_to_url=redirect_to_url)
+            object_.save()
+            return redirect('/home/')
     else:
-        form = SignUPForm()
-
-    return render(request, "name.html", {"form": form})
+        form = RedirectMapForm()
+    return render(request, common_resources.create_redirection_map_html, {"account":account,"form":form}) 

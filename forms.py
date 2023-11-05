@@ -1,6 +1,6 @@
 from django import forms
 from . import common_resources as resource
-import re
+import re,validators
 
 
 class SignUpForm(forms.Form):
@@ -38,10 +38,14 @@ class SignInForm(forms.Form):
 
 class RedirectMapForm(forms.Form):
     rule_name = forms.CharField(widget=forms.TextInput(attrs={"name":"rule_name","placeholder":"Name of the rule"}),required=True)
-    redirect_to_url = forms.CharField(widget=forms.Textarea(attrs={"name":"redirect_to_url","placeholder":"redirect_to","rows":6,"cols":50}),required=True)
+    redirect_to_url = forms.CharField(widget=forms.Textarea(attrs={"name":"redirect_to_url","placeholder":"Redirect to url. Please use http/https","rows":6,"cols":50}),required=True)
     def clean(self):
         cleaned_data = super().clean()
         rule_name = cleaned_data.get('rule_name')
         redirect_to_url = cleaned_data.get('redirect_to_url')
+        if not validators.url(redirect_to_url):
+            raise forms.ValidationError('Either this url is not valid or you did not use http/https')
+
+
         
 

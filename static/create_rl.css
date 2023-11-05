@@ -1,0 +1,21 @@
+.gen_margin{
+    margin-top:10px;
+    margin-left:30px;
+}
+
+.registerbtn {
+    background-color: #04AA6D;
+    color: white;
+    padding: 12px 15px;
+    margin: 0 0 0 0;
+    border: none;
+    cursor: pointer;
+    width: 20%;
+    opacity: 0.9;
+  }
+
+.header
+{
+font-size:15px;
+font-weight:600;
+}
