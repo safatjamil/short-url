@@ -66,7 +66,7 @@ def signin(request):
                     request.session["signed_in"] = True
                     request.session["fk"] = key.decode()
                     request.session["sk"] = encrypted_id.decode()
-                    request.session.set_expiry(6000)
+                    request.session.set_expiry(172800)
                     return redirect('/home/')
                 else:
                     return render(request, common_resources.signin_html, {"form": form,"messages":["Your email or password is incorrect"]}) 
