@@ -16,6 +16,7 @@ home_html = 'home.html'
 create_redirection_map_html = 'create_redirection_map.html'
 delete_redirection_map_html = 'delete_redirection_map.html'
 edit_redirection_map_html = 'edit_redirection_map.html'
+
 # methods
 def get_org_id(request):
     fer = Fernet(bytes(request.session["fk"],'utf-8'))

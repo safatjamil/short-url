@@ -2,7 +2,7 @@
 {% block head %}
 {% load static %}
   <head>
-  <title>Create redirection rule</title>
+  <title>Edit redirection rule</title>
   <link rel="stylesheet" href="{% static 'create_rl.css' %}">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
@@ -11,23 +11,26 @@
 
 {% block content %}
 <div class="container">
- <div class="gen_margin"><p class="header">Create rediction rule</p></div>
+ <div class="gen_margin"><p class="header">Edit rediction rule</p></div>
  <form action="" method="post">
       {% csrf_token %}
       <div class="container">
 
-        {% if form.errors%}
         <div class="response">
-            {{ form.non_field_errors }}
+            {{ response }}
         </div>
-        {% endif %}
 
-        {% for field in form %}
         <div class="gen_margin">
-          {{field}}
+          <input type="text" id="rule_name" name="rule_name" value="{{rule.redirect_name}}" required>
         </div>
-        {% endfor %}
-        <div class="gen_margin"><button type="submit" class="registerbtn">Create</button></div>
+        <div class="gen_margin">
+          <input type="text" id="incoming_url" name="incoming_url" value="{{rule.incoming_url}}" disabled>
+        </div>
+        <div class="gen_margin">
+          <textarea id="redirect_to_url" name="redirect_to_url" placeholder="Redirect to url. Please use http/https" rows="6" cols="50">{{rule.redirect_to}}</textarea>
+        </div>
+        
+        <div class="gen_margin"><button type="submit" class="registerbtn">Edit</button></div>
       </div>
 </form>
 </div>

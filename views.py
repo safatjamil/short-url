@@ -1,9 +1,9 @@
-from django.http import HttpResponse
+from django.http import HttpResponse,HttpResponseRedirect
 from django.shortcuts import redirect,render
 from django.template import loader
 from django.urls import reverse
 from django.contrib import messages
-import datetime,re,bcrypt
+import datetime,re,bcrypt,validators
 from .forms import SignUpForm,SignInForm,RedirectMapForm
 from . import models,common_resources
 from cryptography.fernet import Fernet
@@ -114,12 +114,28 @@ def create_redirection_map(request):
 def edit_redirection_map(request,rl_id):
     if not common_resources.is_logged_in(request):
         return redirect('/signin/')
-
     get_rule = common_resources.get_redirection_rule(rl_id)
     if (not get_rule) or get_rule[0]["org_id"] != common_resources.get_org_id(request):
-        return HttpResponse('<html><head><title>Error</title></head><body><p>Something went wrong arnir putkite ki je gondho<p></body></html>')
-    
-    return render(request, common_resources.edit_redirection_map_html) 
+        return HttpResponse('<html><head><title>Error</title></head><body><p>Something went wrong<p></body></html>')
+    if request.method == "POST":
+        rule_name = request.POST["rule_name"]
+        rule_name = rule_name.strip()
+        redirect_to = request.POST["redirect_to_url"]
+        redirect_to = redirect_to.strip()
+        
+        #validate the url
+        if not validators.url(redirect_to):
+            response = 'Either this url is not valid or you did not use http/https'
+            return render(request, common_resources.edit_redirection_map_html,{"rule":get_rule[0],"response":response}) 
+        rule = models.RedirectMap.objects.get(id=get_rule[0]["id"])
+        rule.redirect_name = rule_name
+        rule.redirect_to = redirect_to
+        rule.save()
+        response = "Your rule has been changed"
+        get_rule = common_resources.get_redirection_rule(get_rule[0]["id"])
+        return render(request, common_resources.edit_redirection_map_html,{"rule":get_rule[0],"response":response}) 
+
+    return render(request, common_resources.edit_redirection_map_html,{"rule":get_rule[0],"response":""}) 
 
 
 def delete_redirection_map(request,rl_id):
@@ -137,6 +153,14 @@ def delete_redirection_map(request,rl_id):
             rule.delete()
             message = "This rule has been deleted"
     return render(request, common_resources.delete_redirection_map_html, {"message":message}) 
-    
+
+def main_redirection(request,short_code):
+    short_code = short_code.split('-')
+    org_alias,randcode = short_code[0],short_code[1]
+    get_rule = models.RedirectMap.objects.filter(org_alias=org_alias,randcode=randcode).values()
+    if not get_rule:
+        return HttpResponse('<html><head><title>Error</title></head><body><p>Something went wrong. We can not find any redirection rule for this url.<p></body></html>')
+    return HttpResponseRedirect(get_rule[0]["redirect_to"])
+
  
     

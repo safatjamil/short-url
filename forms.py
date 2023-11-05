@@ -46,6 +46,5 @@ class RedirectMapForm(forms.Form):
         if not validators.url(redirect_to_url):
             raise forms.ValidationError('Either this url is not valid or you did not use http/https')
 
-
         
 
