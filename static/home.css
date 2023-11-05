@@ -14,11 +14,53 @@ margin-left:30px;
 font-size:15px;
 font-weight:bold;
 } 
-.rules_container
-{
-margin-top:40px;
-}
 .gen_text
 {
 margin-left:30px;
 }
+.rules_container
+{
+margin-top:40px;
+}
+.rule
+{
+margin-left:30px;
+margin-right:55%;
+margin-top:30px;
+}
+.rule_name
+{
+font-size:13px;
+font-weight:600;
+color:#4169E1;
+}
+.incoming_url
+{
+margin-top:0px;
+font-size:12px;
+font-weight:400;
+color:#0000CD;
+}
+.outgoing_url
+{
+margin-top:2px;
+font-size:12px;
+font-weight:400;
+color:#00008B;
+}
+.edit{
+    background-color: #006400;
+    color: white;
+    padding: 5px 8px 5px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+.delete{
+    background-color: #8B0000;
+    color: white;
+    padding: 5px 8px 5px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+  }

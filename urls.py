@@ -23,5 +23,6 @@ urlpatterns = [
     path('signin/',views.signin,name='signin'),
     path('home/',views.home,name='home'),
     path('create_rl/',views.create_redirection_map,name='create_redirection_map'),
+    path('delete_rl/<int:rl_id>',views.delete_redirection_map,name='delete_redirection_map'),
     
 ]

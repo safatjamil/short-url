@@ -66,7 +66,7 @@ def signin(request):
                     request.session["signed_in"] = True
                     request.session["fk"] = key.decode()
                     request.session["sk"] = encrypted_id.decode()
-                    request.session.set_expiry(300)
+                    request.session.set_expiry(6000)
                     return redirect('/home/')
                 else:
                     return render(request, common_resources.signin_html, {"form": form,"messages":["Your email or password is incorrect"]}) 
@@ -102,9 +102,29 @@ def create_redirection_map(request):
                 else:
                     break
                 counter+=1
-            object_ = models.RedirectMap(org_id=decr_id,org_alias=org_alias,redirect_name=rule_name,randcode=randcode,redirect_to_url=redirect_to_url)
+            incoming_url = org_alias+"-"+randcode
+            object_ = models.RedirectMap(org_id=decr_id,org_alias=org_alias,redirect_name=rule_name,incoming_url=incoming_url,randcode=randcode,redirect_to=redirect_to_url)
             object_.save()
             return redirect('/home/')
     else:
         form = RedirectMapForm()
     return render(request, common_resources.create_redirection_map_html, {"account":account,"form":form}) 
+
+def delete_redirection_map(request,rl_id):
+    if "signed_in" not in request.session or request.session["signed_in"]==False:
+        return redirect('/signin/')
+    message = ""
+    get_rule = common_resources.get_redirection_rule(rl_id)
+    if not get_rule:
+        message = "This rule does not exist"
+    else:
+        if int(get_rule[0]["org_id"]) != common_resources.get_org_id(request):
+            message = "You're trying to delete a wrong rule"
+        else:
+            rule = models.RedirectMap.objects.get(id=rl_id)
+            rule.delete()
+            message = "This rule has been deleted"
+    return render(request, common_resources.delete_redirection_map_html, {"message":message}) 
+    
+ 
+    

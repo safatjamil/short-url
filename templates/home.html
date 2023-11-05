@@ -20,10 +20,18 @@
 <div class="rules_container">
     <p class="alias">Redirection rules</p>
     {% if redirection_rules %}
-      {% for rediction in redirection_rules%}
-      <p>rediction.redirect_name</p>
+      {% for rule in redirection_rules %}
+      <div class='rule'>
+        <div class='rule_name'><p>{{rule.redirect_name}}</p></div>
+        <div class='incoming_url'><p>{{host}}/{{rule.incoming_url}}</p></div>
+        <div class='outgoing_url'><p>{{rule.redirect_to}}</p></div>
+        <div class="delete_button">
+           <span><a href= "/edit_rl/{{rule.id}}" class='edit' target="_blank">edit</a></span>
+           <span style="margin-left:10px;"><a href= "/delete_rl/{{rule.id}}" class='delete' target="_blank">Delete</a></span>
+        </div>
+      </div>
       {% endfor %}
-    <p>There are redirection rules</p>
+
     {% else %}
     <p class="gen_text">No rules found</p>
     {% endif %} 

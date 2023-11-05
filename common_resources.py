@@ -5,13 +5,14 @@ import random
 # attributes
 email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
 randcode_string = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
-host = 'shafat.com'
+host = '127.0.0.1:8000'
 
 #html
 signup_html = 'signup.html'
 signin_html = 'signin.html'
 home_html = 'home.html'
 create_redirection_map_html = 'create_redirection_map.html'
+delete_redirection_map_html = 'delete_redirection_map.html'
 
 # methods
 def get_org_id(request):
@@ -23,9 +24,13 @@ def get_user(id):
     user = models.Org.objects.filter(id=id).values()
     return user[0] 
 
-def get_redirection_rules(id):
-    redirection_rules = models.RedirectMap.objects.filter(org_id=id).values()
+def get_redirection_rules(org_id):
+    redirection_rules = models.RedirectMap.objects.filter(org_id=org_id).values()
     return redirection_rules 
+
+def get_redirection_rule(rule_id):
+    redirection_rule = models.RedirectMap.objects.filter(id=rule_id).values()
+    return redirection_rule
 
 def gen_rand_str(size):
     randcode = ''.join(random.choices(randcode_string, k=size))

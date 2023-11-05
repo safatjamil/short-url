@@ -12,4 +12,5 @@ class RedirectMap(models.Model):
     org_alias = models.CharField(max_length=4)
     redirect_name = models.CharField(max_length=60)
     randcode = models.CharField(max_length=6)
+    incoming_url = models.CharField(max_length=60)
     redirect_to = models.CharField(max_length=400)
