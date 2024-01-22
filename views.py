@@ -28,8 +28,7 @@ def signup(request):
             org_alias = org_alias.upper()
             password = form.cleaned_data["password"]
             hashed_password = bcrypt.hashpw(password.encode("utf-8"), 
-                                            bcrypt.gensalt()
-                                           )
+                                            bcrypt.gensalt())
             view_response = ""
             error_flag = False
             org_email_query = models.Org.objects.filter(org_email=org_email).count()
@@ -43,19 +42,15 @@ def signup(request):
                 error_flag = True
             if error_flag:
                 return render(request, common_resources.signup_html, 
-                              {"form": form,"messages":[view_response]}
-                             )
+                              {"form": form,"messages":[view_response]})
             else:
                 object_ = models.Org(org_email=org_email, 
                                      org_alias=org_alias, 
-                                     password=hashed_password
-                                    )
+                                     password=hashed_password)
                 object_.save()
                 return render(request, common_resources.signup_html, 
                               {"form": form, 
-                               "messages": ["Your account has been created. Please visit the sign in page"]
-                              }
-                             ) 
+                               "messages": ["Your account has been created. Please visit the sign in page"]}) 
     else:
         form = SignUpForm()
     return render(request, common_resources.signup_html, {"form": form,"messages":[]})
@@ -71,13 +66,11 @@ def signin(request):
             user_count = models.Org.objects.filter(org_email=org_email).count()
             if user_count<1:
                 return render(request, common_resources.signin_html, 
-                              {"form": form,"messages": ["We can't find this account"]}
-                             ) 
+                              {"form": form,"messages": ["We can't find this account"]}) 
             else:
                 user_query = models.Org.objects.filter(org_email=org_email).values()
                 password_match = bcrypt.checkpw(password.encode("utf-8"), 
-                                                user_query[0]["password"]
-                                               ) 
+                                                user_query[0]["password"]) 
                 if password_match:
                     key = Fernet.generate_key()
                     fernet = Fernet(key)
@@ -90,14 +83,11 @@ def signin(request):
                 else:
                     return render(request, common_resources.signin_html, 
                                   {"form": form, 
-                                   "messages": ["Your email or password is incorrect"]
-                                  }
-                                 ) 
+                                   "messages": ["Your email or password is incorrect"]}) 
     else:
         form = SignInForm()
     return render(request, common_resources.signin_html, 
-                  {"form": form,"messages":[]}
-                 ) 
+                  {"form": form,"messages":[]}) 
 
 def home(request):
     if not common_resources.is_logged_in(request):
@@ -108,9 +98,7 @@ def home(request):
     host = common_resources.host
     return render(request, common_resources.home_html, 
                   {"account": account, "redirection_rules": redirection_rules, 
-                   "host": host
-                  }
-                 ) 
+                   "host": host}) 
     
 
 def create_redirection_map(request):
@@ -138,21 +126,20 @@ def create_redirection_map(request):
                                          redirect_name=rule_name, 
                                          incoming_url=incoming_url, 
                                          randcode=randcode, 
-                                         redirect_to=redirect_to_url
-                                        )
+                                         redirect_to=redirect_to_url)
             object_.save()
             return redirect("/home/")
     else:
         form = RedirectMapForm()
     return render(request, common_resources.create_redirection_map_html, 
-                  {"account":account,"form":form}
-                 ) 
+                  {"account":account,"form":form}) 
 
 def edit_redirection_map(request,rl_id):
     if not common_resources.is_logged_in(request):
         return redirect("/signin/")
     get_rule = common_resources.get_redirection_rule(rl_id)
-    if (not get_rule) or get_rule[0]["org_id"] != common_resources.get_org_id(request):
+    if ((not get_rule) or 
+       get_rule[0]["org_id"] != common_resources.get_org_id(request)):
         return HttpResponse("<html><head><title>Error</title></head><body><p>Something went wrong<p></body></html>")
     if request.method == "POST":
         rule_name = request.POST["rule_name"]
@@ -164,8 +151,7 @@ def edit_redirection_map(request,rl_id):
         if not validators.url(redirect_to):
             response = "Either this url is not valid or you did not use http/https"
             return render(request, common_resources.edit_redirection_map_html, 
-                          {"rule": get_rule[0], "response": response}
-                         ) 
+                          {"rule": get_rule[0], "response": response}) 
         rule = models.RedirectMap.objects.get(id=get_rule[0]["id"])
         rule.redirect_name = rule_name
         rule.redirect_to = redirect_to
@@ -173,12 +159,10 @@ def edit_redirection_map(request,rl_id):
         response = "Your rule has been changed"
         get_rule = common_resources.get_redirection_rule(get_rule[0]["id"])
         return render(request, common_resources.edit_redirection_map_html, 
-                      {"rule": get_rule[0], "response": response}
-                     ) 
+                      {"rule": get_rule[0], "response": response}) 
 
     return render(request, common_resources.edit_redirection_map_html, 
-                  {"rule": get_rule[0], "response": ""}
-                 ) 
+                  {"rule": get_rule[0], "response": ""}) 
 
 
 def delete_redirection_map(request, rl_id):
@@ -197,8 +181,7 @@ def delete_redirection_map(request, rl_id):
             rule.delete()
             message = "This rule has been deleted"
     return render(request, common_resources.delete_redirection_map_html, 
-                  {"message": message}
-                 ) 
+                  {"message": message}) 
 
 def main_redirection(request, short_code):
     short_code = short_code.split("-")
